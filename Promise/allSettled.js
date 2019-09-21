@@ -1,22 +1,22 @@
-
-const PfullSet = v => ({ status: 'fulfilled', value: v });
-const PRejectSet = v => ({ status: 'rejected', reason: v });
-
+const { isIterator } = require('maketype');
 /**
- * @param {Array} promises
+ * @param {iterable} iterable
  * @returns {Array}
  */
-function allSettled(promises) {
-  if (!Array.isArray(promises)) {
-    throw new Error('[allSettled] promises must be array');
+function allSettled(iterable) {
+  if (!isIterator(iterable)) {
+    throw new Error('[allSettled] first param must be iterable');
   }
 
+  const onFulfill = v => ({ status: 'fulfilled', value: v });
+  const onReject = v => ({ status: 'rejected', reason: v });
+
   return Promise
-    .all(promises.map(p =>
+    .all(Array.from(iterable).map(p =>
       Promise
         .resolve(p)
-        .then(PfullSet)
-        .catch(PRejectSet)));
+        .then(onFulfill)
+        .catch(onReject)));
 }
 
 module.exports = allSettled;
